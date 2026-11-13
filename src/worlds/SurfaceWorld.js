@@ -3,6 +3,8 @@
 import * as THREE from 'three';
 
 const EYE_HEIGHT = 1.85; // person is 2 units tall, estimate eye height TODO: move to constants.js
+const MOUSE_SENSITIVITY = 0.002; // radians of turn per pixel of mouse movement
+const MAX_PITCH = Math.PI / 2 - 0.01; // just short of straight up/down, so the view can't flip over
 
 // Used for any planet param that isn't passed in to enter().
 const DEFAULT_PARAMS = {
@@ -19,6 +21,9 @@ export class SurfaceWorld {
 		this.renderer = renderer;
 		this.scene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+		this.yaw = 0;   // turn left/right, radians around world Y
+		this.pitch = 0; // look up/down, radians around the camera's X
 	}
 
 	/**
@@ -59,12 +64,36 @@ export class SurfaceWorld {
 		grid.position.y = 0.01; // just above the ground so the two don't flicker (z-fighting hehe)
 		this.scene.add(grid);
 
-		this.camera.position.set(0, EYE_HEIGHT, 0);
-		this.camera.rotation.set(0, 0, 0);
+		this.camera.position.set(0, EYE_HEIGHT, 0); //set start position as center of map, no need to change later
+
+		this.yaw = 0;
+		this.pitch = 0;
+
+		this.renderer.domElement.addEventListener('click', this.handleClick);
+		document.addEventListener('mousemove', this.handleMouseMove);
 	}
 
 	/** @param {number} dt seconds since last frame */
-	update(dt) {}
+	update(dt) {
+
+		// 'YXZ' = turn (yaw) first, then tilt (pitch), so looking up/down never tips the horizon sideways.
+
+		this.camera.rotation.set(this.pitch, this.yaw, 0, 'YXZ');
+	}
+
+	// Arrow functions so this still means the world when the browser calls them as event listeners.
+	handleClick = () => {
+		this.renderer.domElement.requestPointerLock(); // hides cursor, gives raw mouse movement. Esc releases.
+	};
+
+	handleMouseMove = (event) => {
+		if (document.pointerLockElement !== this.renderer.domElement) return; // only look while mouse is captured
+
+		// Mouse right -> turn right (negative yaw). Mouse up -> look up (positive pitch).
+		this.yaw -= event.movementX * MOUSE_SENSITIVITY;
+		this.pitch -= event.movementY * MOUSE_SENSITIVITY;
+		this.pitch = THREE.MathUtils.clamp(this.pitch, -MAX_PITCH, MAX_PITCH);
+	};
 
 	/** Tear down the world and free GPU memory. Called when leaving the planet. */
 	exit() {
@@ -81,7 +110,10 @@ export class SurfaceWorld {
 		});
 
 		this.scene.clear(); // remove everything from the scene so enter() starts fresh
-        
+
+		this.renderer.domElement.removeEventListener('click', this.handleClick);
+		document.removeEventListener('mousemove', this.handleMouseMove);
+		if (document.pointerLockElement) document.exitPointerLock();
 	}
 
 	onResize(width, height) {
