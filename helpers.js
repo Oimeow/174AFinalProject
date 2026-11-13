@@ -5,7 +5,7 @@ import * as THREE from 'three';
  * @param {number} tx amount to translate on x
  * @param {number} ty amount to translate on y
  * @param {number} tz amount to translate on z
- * @returns Translation matrix
+ * @returns {THREE.Matrix4} Translation matrix
  */
 export function genMatrixTranslate(tx, ty, tz) {
 	return new THREE.Matrix4(1, 0, 0, tx,
@@ -19,7 +19,7 @@ export function genMatrixTranslate(tx, ty, tz) {
  * @param {number} sx amount to scale on x
  * @param {number} sy amount to scale on y
  * @param {number} sz amount to scale on z
- * @returns Scaling matrix
+ * @returns {THREE.Matrix4} Scaling matrix
  */
 export function genMatrixScale(sx, sy, sz) {
 	return new THREE.Matrix4(sx, 0, 0, 0,
@@ -32,7 +32,7 @@ export function genMatrixScale(sx, sy, sz) {
  * Generate a homogeneous rotation matrix
  * @param {string} axis 'x', 'y', or 'z' axis
  * @param {number} rads rotation in radians
- * @returns Rotation matrix
+ * @returns {THREE.Matrix4} Rotation matrix
  */
 export function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
 	let cos_rad = Math.cos(rads);
@@ -71,7 +71,7 @@ export function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
  * @param {number} radius size of the planet
  * @param {*} color color of the planet, as accepted by MeshPhongMaterial
  * @param {THREE.Texture} bumpMap a bumpmap; optional
- * @returns Spherical mesh
+ * @returns {THREE.Mesh} Spherical mesh
  */
 export function genPlanet(radius, color, bumpMap = new THREE.Texture()) {
 
@@ -89,6 +89,7 @@ export function genPlanet(radius, color, bumpMap = new THREE.Texture()) {
  * Generates a star, acting as a point light source
  * @param {number} radius radius of the star 
  * @param {*} color color of the star
+ * @returns {THREE.Mesh} Spherical mesh with a point light inside
  */
 export function genStar(radius, color) {
 	let nSegments = 64;
@@ -122,4 +123,28 @@ export function orbit(object, distance, axis, velocity, timer) {
 
 	object.matrix.copy(transform);
 	object.matrixAutoUpdate = false;
+}
+
+/**
+ * Collision detection between two objects using bounding boxes
+ * @param {THREE.Mesh} object1 one item
+ * @param {THREE.Mesh} object2 another item
+ * @returns {boolean} 'true' or 'false'
+ */
+export function isColliding(object1, object2) {
+	object1.updateMatrixWorld(true);
+	object2.updateMatrixWorld(true);
+
+    let helper1 = new THREE.Box3Helper(object1);
+	let helper2 = new THREE.Box3Helper(object2);
+
+	let bb1 = new THREE.Box3().setFromObject(helper1);
+	let bb2 = new THREE.Box3().setFromObject(helper2);
+
+	if (bb1.intersectsBox(bb2))
+		console.log("Crash");
+
+	// TODO inconsistent collision detection (i.e. not working in animate() loop)
+
+
 }
