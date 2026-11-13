@@ -20,6 +20,8 @@ scene.add( cube );
 camera.position.z = 5;
 camera.position.y = 1;
 
+let timer = new THREE.Timer();	// Clock is deprecated
+
 /**
  * Generate a homogeneous translation matrix
  * @param {number} tx amount to translate on x
@@ -141,19 +143,40 @@ function start() {
 	const zAxis = createAxisLine(0x0000ff, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 2)); // Blue
 
 
-	// Add axes to scene
-	scene.add(xAxis);
-	scene.add(yAxis);
-	scene.add(zAxis);
 }
 
 start();
 
+/**
+ * Orbit an object around the origin
+ * @param {THREE.mesh} object object to orbit
+ * @param {number} distance distance from the origin 
+ * @param {string} axis 'x' or 'y' or 'z', denoting the axis of rotation 
+ * @param {number} velocity orbital velocity in rads/sec 
+ * @param {THREE.Timer} timer an existing THREE timer object
+ */
+function orbit(object, distance, axis, velocity, timer) {
+	
+	let translate = genMatrixTranslate(distance, 0, 0);
+	let rotate = genMatrixRot(axis, velocity * timer.getElapsed());
+
+	let transform = new THREE.Matrix4();
+	transform.multiplyMatrices(translate, transform);
+	transform.multiplyMatrices(rotate, transform);
+
+	object.matrix.copy(transform);
+	object.matrixAutoUpdate = false;
+
+}
+
 function animate() {
+
 	controls.update(); // This will update the camera position and target based on the user input.
 	cube.rotation.x += 0.01;
 	cube.rotation.y += 0.01;
 
+
+	timer.update();	// this is required to update the timer
 	renderer.render( scene, camera );
 
 }
