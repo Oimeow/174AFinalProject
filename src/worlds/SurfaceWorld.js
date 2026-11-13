@@ -6,10 +6,12 @@ import {
 	BUILDING_COUNT, BUILDING_MIN_WIDTH, BUILDING_MAX_WIDTH, BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT,
 } from '../constants.js';
 import { createRandom } from '../systems/random.js';
+import { createNpc } from '../models/npc.js';
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const MAX_PITCH = Math.PI / 2 - 0.01; // slightly less than straight up/down so the view can't flip over
-const SPAWN_CLEAR_RADIUS = 6; // no buildings this close to the center, so you never spawn inside one
+const SPAWN_CLEAR_RADIUS = 8; // no buildings this close to the center, so you never spawn inside one (also covers the NPC)
+const NPC_POSITION = new THREE.Vector3(5, 0, -5); // in front of spawn, off to the right
 const GRID_SPACING = 2; // visual only distance between the ground grid lines
 
 // Used for any planet param that isn't passed in to enter().
@@ -75,6 +77,11 @@ export class SurfaceWorld {
 		this.scene.add(grid);
 
 		this.generateBuildings(planet);
+
+		this.npc = createNpc();
+		this.npc.position.copy(NPC_POSITION);
+		this.npc.rotation.y = Math.atan2(-NPC_POSITION.x, -NPC_POSITION.z); // turn to face the spawn point (origin)
+		this.scene.add(this.npc);
 
 		this.camera.position.set(0, EYE_HEIGHT, 0); //set start position as center of map, no need to change later
 
