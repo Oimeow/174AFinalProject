@@ -21,14 +21,19 @@ const DEFAULT_PARAMS = {
 	buildingColor: 0x8a8f99, // grey
 	size: 100, // temp side length of the square world
 	seed: 1, // same seed -> same building layout
+	name: 'PLANET', // shown in the HUD
 };
 
 export class SurfaceWorld {
 
-	/** @param {THREE.WebGLRenderer} renderer */
+	/**
+	 * @param {THREE.WebGLRenderer} renderer
+	 * @param {import('../ui/hud.js').Hud} hud shared HUD, owned by the page (not the world)
+	 */
 
-	constructor(renderer) {
+	constructor(renderer, hud) {
 		this.renderer = renderer;
+		this.hud = hud;
 		this.scene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
@@ -46,6 +51,7 @@ export class SurfaceWorld {
 	enter(params = {}) {
 		const planet = { ...DEFAULT_PARAMS, ...params }; // defaults - ... in js just means use params defined above, overridden by whatever was passed in
 		this.planet = planet;
+		this.hud.setPlanet(planet.name);
 
 		this.scene.background = new THREE.Color(planet.skyColor);
 		this.scene.fog = new THREE.Fog(planet.skyColor, 20, planet.size / 2); // hides the world's edge with built in fog!

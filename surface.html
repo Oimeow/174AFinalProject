@@ -14,14 +14,19 @@
 		<script type="module">
 			import * as THREE from 'three';
 			import { SurfaceWorld } from './src/worlds/SurfaceWorld.js';
+			import { Hud } from './src/ui/hud.js';
 
 			const renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			document.body.appendChild(renderer.domElement);
 
+			// One HUD for the whole game, like the renderer; worlds just update it.
+			const hud = new Hud();
+			hud.show();
+
 			// Test planet params; later these come from the planet you landed on in space.
-			const world = new SurfaceWorld(renderer);
+			const world = new SurfaceWorld(renderer, hud);
 			world.enter({ groundColor: 0xc2734a, skyColor: 0xf0c8a0 });
 
 			window.addEventListener('resize', () => {
