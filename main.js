@@ -86,6 +86,24 @@ function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
 		throw("genMatrixRot: Something went wrong. Is axis a char? (It should be)");
 }
 
+/**
+ * Generates a Mesh with Phong material
+ * @param {number} radius size of the planet
+ * @param {*} color color of the planet, as accepted by MeshPhongMaterial
+ * @param {THREE.Texture} bumpMap a bumpmap; optional
+ * @returns Spherical mesh
+ */
+function genPlanet(radius, color, bumpMap = new THREE.Texture()) {
+	let nSegments = 64;
+	geometry = new THREE.SphereGeometry(radius, nSegments, nSegments);
+	material = new THREE.MeshPhongMaterial(
+		{color: color, bumpMap: bumpMap
+		// TODO: shininess/specular? (yes?)
+		});
+
+	return new THREE.Mesh(geometry, material);
+}
+
 function createAxisLine(color, start, end) {
     const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
     const material = new THREE.LineBasicMaterial({ color: color });
