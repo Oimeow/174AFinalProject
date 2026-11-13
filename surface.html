@@ -13,20 +13,19 @@
 		<!---- Temp test page for displaying the surface world! Delete once worlds are wired into main.js. ---->
 		<script type="module">
 			import * as THREE from 'three';
+			import { SurfaceWorld } from './src/worlds/SurfaceWorld.js';
 
 			const renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			document.body.appendChild(renderer.domElement);
 
-			// Placeholder scene + camera, TODO: replace with a SurfaceWorld instance.
-			const scene = new THREE.Scene();
-			scene.background = new THREE.Color(0x87ceeb); // tuff sky blue
-			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+			// Test planet params; later these come from the planet you landed on in space.
+			const world = new SurfaceWorld(renderer);
+			world.enter({ groundColor: 0xc2734a, skyColor: 0xf0c8a0 });
 
 			window.addEventListener('resize', () => {
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
+				world.onResize(window.innerWidth, window.innerHeight);
 				renderer.setSize(window.innerWidth, window.innerHeight);
 			});
 
@@ -36,7 +35,8 @@
 				const dt = Math.min((time - lastTime) / 1000, 0.05);
 				lastTime = time;
 
-				renderer.render(scene, camera);
+				world.update(dt);
+				renderer.render(world.scene, world.camera);
 			});
 		</script>
 	</body>
