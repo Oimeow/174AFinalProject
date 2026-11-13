@@ -63,10 +63,8 @@ function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
 		)
 	}
 	else
-		throw("Something went wrong. Is axis a char? (It should be)");
+		throw("genMatrixRot: Something went wrong. Is axis a char? (It should be)");
 }
-
-console.log(genMatrixRot('x', 3));
 
 function createAxisLine(color, start, end) {
     const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
