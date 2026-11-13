@@ -6,7 +6,7 @@ import {
 	BUILDING_COUNT, BUILDING_MIN_WIDTH, BUILDING_MAX_WIDTH, BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT,
 } from '../constants.js';
 import { createRandom } from '../systems/random.js';
-import { createNpc } from '../models/npc.js';
+import { createNpc, TALK_RADIUS } from '../models/npc.js';
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const MAX_PITCH = Math.PI / 2 - 0.01; // slightly less than straight up/down so the view can't flip over
@@ -88,6 +88,8 @@ export class SurfaceWorld {
 		this.npc.position.copy(NPC_POSITION);
 		this.npc.rotation.y = Math.atan2(-NPC_POSITION.x, -NPC_POSITION.z); // turn to face the spawn point (origin)
 		this.scene.add(this.npc);
+		this.talkZoneCenter = this.npc.userData.talkZone.getWorldPosition(new THREE.Vector3()); // NPC never moves, so compute once
+		this.inTalkZone = false;
 
 		this.camera.position.set(0, EYE_HEIGHT, 0); //set start position as center of map, no need to change later
 
@@ -148,11 +150,17 @@ export class SurfaceWorld {
 		if (this.keys.has('KeyA')) move.x -= 1;
 		if (this.keys.has('KeyD')) move.x += 1;
 
-		if (move.lengthSq() > 0) {
+		if (move.lengthSq() > 0 && !this.hud.isDialogOpen) { // no walking while the dialog is up
 			move.normalize(); // so diagonals aren't faster
 			move.applyAxisAngle(Y_AXIS, this.yaw); // rotate into world space to match where you're facing
 			this.camera.position.addScaledVector(move, WALK_SPEED * dt);
 		}
+
+		// Standing inside the NPC's blue ring? (distance on the ground only, ignoring height)
+		const dx = this.camera.position.x - this.talkZoneCenter.x;
+		const dz = this.camera.position.z - this.talkZoneCenter.z;
+		this.inTalkZone = Math.hypot(dx, dz) < TALK_RADIUS;
+		this.hud.setPrompt(this.inTalkZone && !this.hud.isDialogOpen ? 'Press E to talk' : null);
 
 		// 'YXZ' = turn (yaw) first, then tilt (pitch), so looking up/down never tips the horizon sideways.
 
@@ -174,9 +182,21 @@ export class SurfaceWorld {
 	};
 
 	// event.code is the physical key, so WASD works on any keyboard layout hopefully but everyone should be on WASD so it's chill
-	handleKeyDown = (event) => this.keys.add(event.code);
+	handleKeyDown = (event) => {
+		this.keys.add(event.code);
+		if (event.code === 'KeyE' && !event.repeat && this.inTalkZone && !this.hud.isDialogOpen) {
+			this.openTalk();
+		}
+	};
 	handleKeyUp = (event) => this.keys.delete(event.code);
 	handleBlur = () => this.keys.clear(); // if window lost focus: forget held keys so you don't keep walking
+
+	/** Open the NPC dialog: free the mouse so the box can be clicked; closing it puts you back in the game. */
+	openTalk() {
+		this.keys.clear(); // stop walking
+		document.exitPointerLock();
+		this.hud.openDialog(() => this.renderer.domElement.requestPointerLock());
+	}
 
 	/** Tear down the world and free GPU memory. Called when leaving the planet. */
 	exit() {

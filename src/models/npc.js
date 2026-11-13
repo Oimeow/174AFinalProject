@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+export const TALK_RADIUS = 2; // the blue ring is 4x4 units; standing inside it lets you talk
+
 /**
  * Purple bean guy with googly eyes. Feet at y = 0, faces +Z, 2 units tall (one person).
  * @param {number} color body color
@@ -31,6 +33,16 @@ export function createNpc(color = 0x9d8ce0) {
 		pupil.position.set(side * 0.03, 0, 0.13); // relative to the eye: on its front, nudged outward (googly)
 		eye.add(pupil); // child of the eye, so it moves with it
 	}
+
+	// Blue ring on the ground in front of him: stand inside it to talk.
+	const ring = new THREE.Mesh(
+		new THREE.RingGeometry(TALK_RADIUS - 0.15, TALK_RADIUS, 48), // inner radius, outer radius, smoothness
+		new THREE.MeshBasicMaterial({ color: 0x3399ff, side: THREE.DoubleSide }) // Basic = unlit, so it's like a glowing marker
+	);
+	ring.rotation.x = -Math.PI / 2; // RingGeometry faces +Z by default; lay it flat on the ground
+	ring.position.set(0, 0.02, TALK_RADIUS + 0.5); // in front of it (+Z), edge touching its body just above the grid lines
+	npc.add(ring);
+	npc.userData.talkZone = ring; // userData = Three.js's spot for your own info; SurfaceWorld checks distance to this
 
 	return npc;
 }
