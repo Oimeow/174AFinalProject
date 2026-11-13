@@ -1,0 +1,1 @@
+// shared game memory - ram, current planet, location (?)

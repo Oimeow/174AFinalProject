@@ -1,0 +1,1 @@
+// flat world gravity (maybe different depending on world), jumping, ground checks
