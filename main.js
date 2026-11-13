@@ -20,6 +20,22 @@ scene.add( cube );
 camera.position.z = 5;
 camera.position.y = 1;
 
+function genMatrixTranslate(tx, ty, tz) {
+	return new THREE.Matrix4(1, 0, 0, tx,
+							0, 1, 0, ty,
+							0, 0, 1, tz,
+							0, 0, 0, 1);
+}
+
+function genMatrixScale(sx, sy, sz) {
+	return new THREE.Matrix4(sx, 0, 0, 0,
+							0, sy, 0, 0,
+							0, 0, sz, 0,
+							0, 0, 0, 1);
+}
+
+
+
 
 function createAxisLine(color, start, end) {
     const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
