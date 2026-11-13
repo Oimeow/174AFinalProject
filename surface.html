@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<title>Surface World (dev)</title>
+		<style>
+			body { margin: 0; overflow: hidden; }
+		</style>
+	</head>
+	
+	<body>
+		<!---- Temp test page for displaying the surface world! Delete once worlds are wired into main.js. ---->
+		<script type="module">
+			import * as THREE from 'three';
+
+			const renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			// Placeholder scene + camera, TODO: replace with a SurfaceWorld instance.
+			const scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x87ceeb); // tuff sky blue
+			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+			window.addEventListener('resize', () => {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			});
+
+			let lastTime = performance.now();
+			renderer.setAnimationLoop((time) => {
+				// Seconds since last frame, capped so a background tab doesn't cause a huge jump on return
+				const dt = Math.min((time - lastTime) / 1000, 0.05);
+				lastTime = time;
+
+				renderer.render(scene, camera);
+			});
+		</script>
+	</body>
+</html>
