@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { TrailRenderer } from './trailRenderer';
 
 
 /**
@@ -43,6 +44,8 @@ export function generatePlanet(radius, subdivisions, color) {
 export function randomGenerateSpace(star, seed, numPlanets) {
     let planets = {
         objs: new THREE.Group(), 
+        meshes: [],
+        trails: [],
         speeds: [],
         radii: [],
         dists: [],
@@ -57,15 +60,20 @@ export function randomGenerateSpace(star, seed, numPlanets) {
         const dist = r_prev + randomf(dr, dr * 1.5) * Math.cbrt(i);
         const radius = randomf(0.6, 0.8) * (dist - r_prev) * 0.5;
         const mass = randomf(0.5, 10) * radius;  // arbitrary mass units, might need to better define
-        
+        const speed = Math.sqrt(star.mass * 1.0 / dist)  // need to implement G constant.
+
         const th = randomf(0, 6.28);  // random starting angle.
 
+        const trail = new TrailRenderer(color, 100);
         let p = generatePlanet(radius, 30, color);
         p.position.set(dist * Math.cos(th), 0, dist * Math.sin(th));
 
-        const speed = Math.sqrt(star.mass * 1.0 / dist)  // need to implement G constant.
-
+        planets.objs.add(trail.line);
         planets.objs.add(p);
+
+        planets.meshes.push(p);
+        planets.trails.push(trail);
+
         planets.speeds.push(speed);
         planets.radii.push(radius);
         planets.dists.push(dist);
@@ -83,17 +91,19 @@ export function randomGenerateSpace(star, seed, numPlanets) {
  * @param {number} dt delta tiem since last frame
  */
 export function orbitPlanets(planets, dt) {
-	planets.objs.children.forEach((planet, i) => {
+	planets.meshes.forEach((planet, i) => {
 		const speed = planets.speeds[i];
 		const omega = speed / planets.dists[i];
 
 		const deltaTheta = omega * dt * 100;
-		// const deltaTheta = dt;
 
+        // rotate/increment around solar system axis
 		planet.position.applyAxisAngle(
 			new THREE.Vector3(0,1,0),
 			deltaTheta
 		);
+
+        planets.trails[i].update(planet.position);
 	})
 }
 
