@@ -20,6 +20,13 @@ scene.add( cube );
 camera.position.z = 5;
 camera.position.y = 1;
 
+/**
+ * Generate a homogeneous translation matrix
+ * @param {number} tx amount to translate on x
+ * @param {number} ty amount to translate on y
+ * @param {number} tz amount to translate on z
+ * @returns Translation matrix
+ */
 function genMatrixTranslate(tx, ty, tz) {
 	return new THREE.Matrix4(1, 0, 0, tx,
 							0, 1, 0, ty,
@@ -27,6 +34,13 @@ function genMatrixTranslate(tx, ty, tz) {
 							0, 0, 0, 1);
 }
 
+/**
+ * Generate a homogeneous scaling matrix
+ * @param {number} sx amount to scale on x
+ * @param {number} sy amount to scale on y
+ * @param {number} sz amount to scale on z
+ * @returns Scaling matrix
+ */
 function genMatrixScale(sx, sy, sz) {
 	return new THREE.Matrix4(sx, 0, 0, 0,
 							0, sy, 0, 0,
@@ -34,6 +48,12 @@ function genMatrixScale(sx, sy, sz) {
 							0, 0, 0, 1);
 }
 
+/**
+ * Generate a homogeneous rotation matrix
+ * @param {string} axis 'x', 'y', or 'z' axis
+ * @param {number} rads rotation in radians
+ * @returns Rotation matrix
+ */
 function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
 	let cos_rad = Math.cos(rads);
 	let sin_rad = Math.sin(rads);
