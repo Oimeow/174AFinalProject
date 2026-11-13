@@ -16,7 +16,7 @@ export function randomGenerateSpace(numPlanets = 8) {
     };
 
     const star = new Star({
-        radius: 30,
+        radius: 100,
         color: 0xffcc44,  // nice looking color,
         mass: 1_000
     });
