@@ -93,18 +93,36 @@ function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
  * @param {THREE.Texture} bumpMap a bumpmap; optional
  * @returns Spherical mesh
  */
-function genPlanet(radius, color) {
+function genPlanet(radius, color, bumpMap = new THREE.Texture()) {
 
 	let nSegments = 64;
 	let geometry = new THREE.SphereGeometry(radius, nSegments, nSegments);
 	let material = new THREE.MeshPhongMaterial(
-		{color: color
-		// TODO: bumpmap
-		// TODO: shininess/specular? (yes?)
+		{color: color, bumpMap: bumpMap
+		// shininess/specularity may be considered in the futuer
 		});
 
 	return new THREE.Mesh(geometry, material);
 }
+
+/**
+ * Generates a star, acting as a point light source
+ * @param {number} radius radius of the star 
+ * @param {*} color color of the star
+ */
+function genStar(radius, color) {
+	let nSegments = 64;
+	let geometry = new THREE.SphereGeometry(radius, nSegments, nSegments);
+	let material = new THREE.MeshBasicMaterial({color: color});
+
+	let star = new THREE.Mesh(geometry, material);
+	let light = new THREE.PointLight(color, 1, 0, 0);
+	
+	star.add(light);
+
+	return star;
+}
+
 
 function createAxisLine(color, start, end) {
     const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
