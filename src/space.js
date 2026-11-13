@@ -25,19 +25,40 @@ export function generateStar(radius, subdivisions, color) {
 }
 
 export function generatePlanet(radius, subdivisions, color) {
-    const planetGeo = new THREE.SphereGeometry(radius, subdivisions, subdivisions);
-    const planetMat = new THREE.MeshPhongMaterial({
-        color: color
+    const geo = new THREE.SphereGeometry(radius, subdivisions, subdivisions);
+    const mat = new THREE.MeshPhongMaterial({color: color});
 
-    });
-
-    return new THREE.Mesh(planetGeo, planetMat);
+    return new THREE.Mesh(geo, mat);
 }
 
 /**
- * Generate a THREE.Scene object for space.
+ * Generate a faux atmosphere mesh.
+ * @param {number} radius radius of the underlying planet
+ * @param {THREE.Color} color planetary color and, thus, atmosphere color
+ * @returns THREE.Mesh 
+ */
+export function generateAtmosphere(radius, color) {
+    const atmosphereThickness = randomf(0.99, 1.2);
+    const geo = new THREE.SphereGeometry(
+        radius * atmosphereThickness, 32, 32
+    );  // just barely enveloping the planet
+
+    const mat = new THREE.MeshPhongMaterial({
+        color: color, 
+        transparent: true, 
+        opacity: 0.2,
+        side: THREE.DoubleSide,
+        depthWrite: false
+    });
+
+    return new THREE.Mesh(geo, mat);
+}
+// ^^^ replace with Fresnel shader later
+
+/**
+ * Generate a JSON object for the environment.
  * @param {JSON} star given star of the system
- * @param {number} seed seed for random generation
+ * @param {number} seed seed for random generation (not yet implemented)
  * @param {number} numPlanets number of planets in system
  * @returns THREE.Scene object with star/planets
  */
@@ -64,14 +85,20 @@ export function randomGenerateSpace(star, seed, numPlanets) {
 
         const th = randomf(0, 6.28);  // random starting angle.
 
-        const trail = new TrailRenderer(color, 100);
         let p = generatePlanet(radius, 30, color);
-        p.position.set(dist * Math.cos(th), 0, dist * Math.sin(th));
+        let atmosphere = generateAtmosphere(radius, color);
+        
+        const planetSystem = new THREE.Group();
+        planetSystem.add(p);
+        planetSystem.add(atmosphere);
+        planetSystem.position.set(dist * Math.cos(th), 0, dist * Math.sin(th));
+
+        const trail = new TrailRenderer(color, 100);
 
         planets.objs.add(trail.line);
-        planets.objs.add(p);
+        planets.objs.add(planetSystem);
 
-        planets.meshes.push(p);
+        planets.meshes.push(planetSystem);
         planets.trails.push(trail);
 
         planets.speeds.push(speed);
