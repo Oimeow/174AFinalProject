@@ -34,8 +34,39 @@ function genMatrixScale(sx, sy, sz) {
 							0, 0, 0, 1);
 }
 
+function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
+	let cos_rad = Math.cos(rads);
+	let sin_rad = Math.sin(rads);
 
+	if (axis == 'x') {
+		return new THREE.Matrix4(
+			1, 	0, 			0, 				0,
+			0, 	cos_rad, 	-1 * sin_rad,	0,
+			0, 	sin_rad, 	cos_rad,		0,
+			0, 	0, 			0, 				1
+		)
+	}
+	else if (axis == 'y') {
+		return new THREE.Matrix4(
+			cos_rad, 		0, 	sin_rad, 	0,
+			0, 				1,	0, 			0,
+			-1 * sin_rad, 	0, 	cos_rad,	0,
+			0, 				0, 	0, 			1
+		)
+	}
+	else if (axis == 'z') {
+		return new THREE.Matrix4(
+			cos_rad,	-1 * sin_rad,	0,	0,
+			sin_rad, 	cos_rad, 		0, 	0,
+			0, 			0, 				1, 	0,
+			0, 			0, 				0, 	1
+		)
+	}
+	else
+		throw("Something went wrong. Is axis a char? (It should be)");
+}
 
+console.log(genMatrixRot('x', 3));
 
 function createAxisLine(color, start, end) {
     const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
