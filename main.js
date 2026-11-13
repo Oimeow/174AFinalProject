@@ -95,8 +95,8 @@ function genMatrixRot(axis, rads) {	// axis is char 'x' 'y' or 'z'
  */
 function genPlanet(radius, color, bumpMap = new THREE.Texture()) {
 	let nSegments = 64;
-	geometry = new THREE.SphereGeometry(radius, nSegments, nSegments);
-	material = new THREE.MeshPhongMaterial(
+	let geometry = new THREE.SphereGeometry(radius, nSegments, nSegments);
+	let material = new THREE.MeshPhongMaterial(
 		{color: color, bumpMap: bumpMap
 		// TODO: shininess/specular? (yes?)
 		});
@@ -125,6 +125,8 @@ function start() {
 	scene.add(xAxis);
 	scene.add(yAxis);
 	scene.add(zAxis);
+
+	scene.add(genPlanet(5, 0xFF00FF));
 }
 
 start();
